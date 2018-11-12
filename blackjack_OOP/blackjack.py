@@ -69,6 +69,8 @@ class Game:
         self.deck = Deck(6)
         self.player = Hand()
         self.dealer = Hand()
+        self.chips = 1000
+        self.bet = 0
 
     def initial_deal(self):
         for i in range(2):
@@ -79,24 +81,74 @@ class Game:
         player.hand.append(self.deck.draw_card())
         print(f"a {player.hand[-1]} was drawn")
 
-    # def show_dealer_top_card(self):
-    #     self.dealer.dealer_top_card()
+    def display_hand(self):
+        print(f"Your current hand is {self.player.hand}")
 
-    # def deal_to_dealer(self, num=1):
-    #     for i in range(num):
-    #         self.dealer.hand.append(self.deck.draw_card())
+    def hit_or_stay(self):
+        choice = None
+        while not (choice == 'h' or choice == 's'):
+            if choice is not None:
+                print("I didn't understand that, please try again")
+            choice = input("Would you like to (h)it or (s)tay?: ").lower()
+        return choice == 'h'
 
-    # def deal_to_player(self, num=1):
-    #     for i in range(num):
-    #         self.player.hand.append(self.deck.draw_card())
+    def place_bet(self):
+        print(f"You currently have {self.chips} chips")
+        self.bet = None
+        while not isinstance(self.bet, int):
+            if self.bet is not None:
+                print("I didn't understand that, please try again")
+            bet = input(f"Please place a bet (0 - {self.chips}): ")
+            try:
+                self.bet = int(bet)
+                print(f"You bet {self.chips} chips on this round.")
+                self.chips -= self.bet
+            except:
+                continue
 
-    def play_round(self):
-        self.initial_deal()
-        # show_dealer_top_card()
+    def show_dealer_top_card(self):
         self.dealer.dealer_top_card()
-        hit(self.player)
+
+    def get_score(self, player):
+        score = sum([card.get_value() for card in player.hand])
+        has_ace = [card.get_value() for card in player.hand if card.rank == 'Ace']
+        if has_ace and score <= 11:
+            score += 10
+        return score
+
+    def is_bust(self, player):
+        is_busted = self.get_score(player) > 21
+        if is_busted:
+            print('You busted!')
+        return is_busted
+
+    def determine_winner(self):
+        print(f"The dealer has {self.get_score(self.dealer)} with a hand of {self.dealer.hand}")
+        if self.get_score(self.player) > self.get_score(self.dealer):
+            print('You won the round!!')
+            self.chips += (self.bet * 2)
+        else:
+            print("The dealer wins this round")
+
+    def play_blackjack(self):
+        while self.chips > 0:
+            self.place_bet()
+            self.initial_deal()
+            self.show_dealer_top_card()
+            self.display_hand()
+            while self.hit_or_stay():
+                self.hit(self.player)
+                print(f"Your current score is {self.get_score(self.player)}")
+                busted = self.is_bust(self.player)
+                if busted:
+                    break
+            if not busted:
+                self.determine_winner()
+        if play_again():
+            self.chips = 1000
+            play_blackjack(self)
+        else:
+            print("Thanks for playing!")
 
 blackjack = Game()
-
-blackjack.play_round()
-# print(blackjack.deck)
+blackjack.play_blackjack()
