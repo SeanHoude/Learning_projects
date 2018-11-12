@@ -70,18 +70,31 @@ class Game:
         self.player = Hand()
         self.dealer = Hand()
 
-    def deal_to_dealer(self, num=1):
-        for i in range(num):
+    def initial_deal(self):
+        for i in range(2):
             self.dealer.hand.append(self.deck.draw_card())
-    
-    def deal_to_player(self, num=1):
-        for i in range(num):
             self.player.hand.append(self.deck.draw_card())
 
+    def hit(self, player):
+        player.hand.append(self.deck.draw_card())
+        print(f"a {player.hand[-1]} was drawn")
+
+    # def show_dealer_top_card(self):
+    #     self.dealer.dealer_top_card()
+
+    # def deal_to_dealer(self, num=1):
+    #     for i in range(num):
+    #         self.dealer.hand.append(self.deck.draw_card())
+
+    # def deal_to_player(self, num=1):
+    #     for i in range(num):
+    #         self.player.hand.append(self.deck.draw_card())
+
     def play_round(self):
-        self.deal_to_dealer(2)
-        self.deal_to_player(2)
+        self.initial_deal()
+        # show_dealer_top_card()
         self.dealer.dealer_top_card()
+        hit(self.player)
 
 blackjack = Game()
 
