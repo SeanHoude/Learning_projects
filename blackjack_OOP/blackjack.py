@@ -82,12 +82,14 @@ class Game:
         for i in range(2):
             self.dealer.hand.append(self.deck.draw_card())
             self.player.hand.append(self.deck.draw_card())
-        self.show_dealer_top_card()
-        self.get_score(self.player)
 
-    def hit(self, player):
-        player.hand.append(self.deck.draw_card())
-        print(f"a {player.hand[-1]} was drawn.")
+    def player_hit(self):
+        self.player.hand.append(self.deck.draw_card())
+        print(f"You drew a {self.player.hand[-1]}.")
+
+    def dealer_hit(self):
+        self.dealer.hand.append(self.deck.draw_card())
+        print(f"The dealer drew a {self.dealer.hand[-1]}.")
 
     def display_hand(self):
         print(f"Your current hand is {self.player.hand}.")
@@ -137,16 +139,19 @@ class Game:
         return is_busted
 
     def dealer_turn(self):
-        while self.get_score(self.dealer) < self.get_score(self.player):
-            self.hit(self.dealer)
+        while self.get_score(self.dealer) < 17:
+            self.dealer_hit()
 
     def determine_winner(self):
-        print(f"The dealer has {self.get_score(self.dealer)} with a hand of {self.dealer.hand}.")
+        if self.get_score(self.dealer) > 21:
+            print(f"The dealer busted! -- with a score of {self.get_score(self.dealer)} and a hand of {self.dealer.hand}.")
+        else:
+            print(f"The dealer has {self.get_score(self.dealer)} with a hand of {self.dealer.hand}.")
         if self.get_score(self.dealer) > 21 or self.get_score(self.player) > self.get_score(self.dealer):
             print('You won the round!!')
             self.chips += (self.bet * 2)
         else:
-            print("The dealer won this round.")
+            print("The dealer wins!")
 
     def play_again(self):
         choice = None
@@ -156,25 +161,30 @@ class Game:
             choice = input("Would you like to play again? (y/n): ").lower()
         return choice == 'y'
 
-    # def display(self):
-    #     self.clearscreen(self)
-    #     print(f"Current bet: {self.bet}")
-    #     print(f"Chips remaining: {self.chips}")
-    #     print(f"")
-    #     print(f"")
+    def display(self):
+        self.clearscreen()
+        print("----------------------------")
+        print(f"Current bet: {self.bet}")
+        print(f"Chips remaining: {self.chips}")
+        self.show_dealer_top_card()
+        self.display_hand()
+        print(f"Your hand is worth {self.get_score(self.player)} points")
+        print("----------------------------")
 
     def play_blackjack(self):
         while self.chips > 0:
             self.place_bet()
             self.initial_deal()
-            self.display_hand()
+            # self.display_hand()
             busted = False
+            self.display()
             while self.hit_or_stay():
-                self.hit(self.player)
+                self.player_hit()
                 print(f"Your current score is {self.get_score(self.player)}")
                 busted = self.is_bust(self.player)
                 if busted:
                     break
+                self.display()
             if not busted:
                 self.dealer_turn()
                 self.determine_winner()
